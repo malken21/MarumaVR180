@@ -6,11 +6,11 @@ Shader "Marumasa/VR180-Camera"
 		[NoScaleOffset][SingleLineTexture] _LeftEyeTex( "LeftEye-Atlas", 2D ) = "black" {}
 		// 右目用テクスチャ
 		[NoScaleOffset][SingleLineTexture] _RightEyeTex( "RightEye-Atlas", 2D ) = "black" {}
-		
+
 		// 画面サイズ
 		_ScreenWidth( "Screen Width", Float ) = 16
 		_ScreenHeight( "Screen Height", Float ) = 9
-		
+
 		// デバッグ設定
 		[Toggle] _DebugMode( "DebugMode", Float ) = 0
 		_Cutoff( "Mask Clip Value", Float ) = 0.5
@@ -26,11 +26,11 @@ Shader "Marumasa/VR180-Camera"
 			"DisableBatching" = "True"
 			"IsEmissive" = "true"
 		}
-		
+
 		Cull Front
 		ZWrite On
 		ZTest Always
-		
+
 		CGPROGRAM
 		#include "UnityShaderVariables.cginc"
 		#pragma target 3.5
@@ -123,7 +123,7 @@ Shader "Marumasa/VR180-Camera"
 
 			// 左右判定
 			half isRightEye = saturate( ceil( -0.5 + screenPosNorm.x ) );
-			
+
 			float2 finalUV = 0;
 			half finalMask = 0;
 			float4 finalColor = 0;
@@ -133,7 +133,7 @@ Shader "Marumasa/VR180-Camera"
 			const float atlasL_offsetX    = 0.25;
 			const float atlasUP_offsetX   = 0.50;
 			const float atlasDOWN_offsetX = 0.75;
-			
+
 			// 片目のみ計算・サンプリング
 			if( isRightEye > 0.5 )
 			{
@@ -143,15 +143,15 @@ Shader "Marumasa/VR180-Camera"
 				float2 uvRightL = saturate( RemapUV( projectedYZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
 				float2 uvRightL_swapped = float2( uvRightL.y, uvRightL.x );
 				half maskRightL = ComputeFaceMask( uvRightL ) * saturate( ceil( sphereVector.x ) );
-				
+
 				// 背面 (-Z)
 				float2 uvRightR = saturate( RemapUV( projectedXY, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
 				half maskRightR = ComputeFaceMask( uvRightR ) * saturate( ceil( -sphereVector.z ) );
-				
+
 				// 上面 (+Y)
 				float2 uvRightUpRaw = saturate( RemapUV( projectedXZ, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
 				half maskUp = ComputeFaceMask( uvRightUpRaw ) * saturate( ceil( sphereVector.y ) );
-				
+
 				// 下面 (-Y)
 				float2 uvRightDownRaw = saturate( RemapUV( projectedXZ, float2( 1, 1 ), float2( -1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
 				half maskDown = ComputeFaceMask( uvRightDownRaw ) * saturate( ceil( -sphereVector.y ) );
@@ -161,9 +161,9 @@ Shader "Marumasa/VR180-Camera"
 				finalUV += float2( uvRightR.x * 0.25 + atlasR_offsetX, uvRightR.y ) * maskRightR;
 				finalUV += float2( uvRightUpRaw.x * 0.25 + atlasUP_offsetX, uvRightUpRaw.y ) * maskUp;
 				finalUV += float2( uvRightDownRaw.x * 0.25 + atlasDOWN_offsetX, uvRightDownRaw.y ) * maskDown;
-				
+
 				finalMask = maskRightL + maskRightR + maskUp + maskDown;
-				
+
 				finalColor = tex2D( _RightEyeTex, finalUV ) * finalMask;
 			}
 			else
@@ -208,7 +208,7 @@ Shader "Marumasa/VR180-Camera"
 			float aspectDiff = abs( sign( screenAspect - targetAspect ) );
 			float aspectMask = _DebugMode ? 1.0 : ( 1.0 - aspectDiff );
 			float squareScreenMask = abs( sign( _ScreenParams.x - _ScreenParams.y ) );
-			
+
 			clip( finalColor.a * squareScreenMask * aspectMask - _Cutoff );
 		}
 
