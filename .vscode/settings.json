@@ -51,5 +51,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "NadeCamera.sln"
+    "dotnet.defaultSolution": "NadeCamera.sln",
+    "liveServer.settings.port": 5501
 }
