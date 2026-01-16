@@ -1,8 +1,7 @@
-Shader "Unlit/Mask"
+Shader "Marumasa/VR180/Mask"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
     }
     SubShader
     {

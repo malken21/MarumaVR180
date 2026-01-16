@@ -1,4 +1,4 @@
-Shader "Marumasa/VR180-Preview"
+Shader "Marumasa/VR180/Preview"
 {
     Properties
     {
@@ -107,7 +107,33 @@ Shader "Marumasa/VR180-Preview"
                 v2f o;
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-                o.vertex = UnityObjectToClipPos(v.vertex);
+
+                // Billboard Logic: transform vertices to always face the camera (View Space alignment)
+                
+                // 1. Get the View Space position of the object's origin (ignoring object rotation)
+                float3 viewPos = UnityObjectToViewPos(float4(0,0,0,1));
+
+                // 2. Extract World Scale from the ObjectToWorld matrix
+                // Unity's matrix columns 0, 1, 2 represent the X, Y, Z axes in world space.
+                // Their lengths correspond to the scale factors.
+                float3 wScale = float3(
+                    length(unity_ObjectToWorld[0].xyz), 
+                    length(unity_ObjectToWorld[1].xyz), 
+                    length(unity_ObjectToWorld[2].xyz)
+                );
+
+                // 3. Apply vertex offset directly in View Space
+                // This aligns the object's local axes with the Camera's View axes (X=Right, Y=Up).
+                // We handle both Quad (defined in XY) and Plane (defined in XZ) by summing Y and Z components.
+                // Note: v.vertex is in Object Space.
+                float width  = v.vertex.x * wScale.x;
+                float height = v.vertex.y * wScale.y + v.vertex.z * wScale.z;
+
+                viewPos += float3(width, height, 0);
+
+                // 4. Transform from View Space to Clip Space
+                o.vertex = mul(UNITY_MATRIX_P, float4(viewPos, 1));
+
                 // Standard UV pass-through
                 o.uv = v.uv; 
                 return o;
