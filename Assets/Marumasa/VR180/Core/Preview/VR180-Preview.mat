@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: VR180-Picture
-  m_Shader: {fileID: 4800000, guid: 74cea163471c0ff478cbe5e8d26af3ff, type: 3}
+  m_Name: VR180-Preview
+  m_Shader: {fileID: 4800000, guid: 3f845e10088ff5f488a3cffbdc8c42e5, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []

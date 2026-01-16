@@ -8,7 +8,7 @@ Shader "Marumasa/VR180-Preview"
         [HideInInspector] _MainTex ("Do not use", 2D) = "black" {}
 
         _FOV ("Field of View", Range(10, 170)) = 60
-        _Aspect ("Aspect Ratio (Width/Height)", Float) = 1.777
+        _Aspect ("Aspect Ratio (Width/Height)", Float) = 1
         _PanX ("Pan X (Degrees)", Range(-180, 180)) = 0
         _PanY ("Pan Y (Degrees)", Range(-90, 90)) = 0
     }
