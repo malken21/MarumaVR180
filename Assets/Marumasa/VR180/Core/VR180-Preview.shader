@@ -2,8 +2,8 @@ Shader "Marumasa/VR180-Preview"
 {
     Properties
     {
-        _LeftEyeTexture ("Left Eye Texture (R, L, U, D)", 2D) = "black" {}
-        _RightEyeTexture ("Right Eye Texture (R, L, U, D)", 2D) = "black" {}
+        _LeftEyeTexture ("LeftEye-Atlas", 2D) = "black" {}
+        _RightEyeTexture ("RightEye-Atlas", 2D) = "black" {}
         
         [HideInInspector] _MainTex ("Do not use", 2D) = "black" {}
 
@@ -14,8 +14,16 @@ Shader "Marumasa/VR180-Preview"
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
+        Tags { "RenderType"="Overlay" "Queue"="Overlay" }
+        ZTest Always
+        ZWrite Off
         LOD 100
+
+        Stencil
+        {
+            Ref 1
+            Comp Equal
+        }
 
         Pass
         {
