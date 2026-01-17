@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5951481793692996252}
   - component: {fileID: 6661025034959984}
-  - component: {fileID: 7898217124158294262}
+  - component: {fileID: 1822163366163792291}
   m_Layer: 0
   m_Name: ProximitySensor
   m_TagString: Untagged
@@ -62,7 +62,7 @@ MonoBehaviour:
   receiverType: 2
   parameter: CameraProximity
   minVelocity: 0.05
---- !u!114 &7898217124158294262
+--- !u!114 &1822163366163792291
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -83,7 +83,7 @@ MonoBehaviour:
     localOnly: 1
     defaultValue: 0
     saved: 0
-    hasExplicitDefaultValue: 0
+    hasExplicitDefaultValue: 1
     m_overrideAnimatorDefaults: 0
 --- !u!1 &5217162588620554286
 GameObject:
@@ -94,10 +94,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8142468244936072975}
-  - component: {fileID: 1299301433147215387}
-  - component: {fileID: 3031139221935795283}
   m_Layer: 0
-  m_Name: Base
+  m_Name: System
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -121,49 +119,6 @@ Transform:
   - {fileID: 6854698208815498022}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &1299301433147215387
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5217162588620554286}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: c4f058047c0b6114d8c5ab21b70396b8, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
---- !u!114 &3031139221935795283
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5217162588620554286}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1bb122659f724ebf85fe095ac02dc339, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  animator: {fileID: 9100000, guid: c4f058047c0b6114d8c5ab21b70396b8, type: 2}
-  layerType: 5
-  deleteAttachedAnimator: 1
-  pathMode: 0
-  matchAvatarWriteDefaults: 0
-  relativePathRoot:
-    referencePath: 
-    targetObject: {fileID: 0}
-  layerPriority: 0
-  mergeAnimatorMode: 0
 --- !u!1001 &690503802597544999
 PrefabInstance:
   m_ObjectHideFlags: 0
