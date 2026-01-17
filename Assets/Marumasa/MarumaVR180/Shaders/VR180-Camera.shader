@@ -1,4 +1,4 @@
-Shader "Marumasa/VR180/Camera"
+Shader "Marumasa/VR180-Camera"
 {
 	Properties
 	{
@@ -83,17 +83,7 @@ Shader "Marumasa/VR180/Camera"
 		// サーフェスシェーダー
 		void surf( Input i, inout SurfaceOutput o )
 		{
-			// VRChat Camera Mode Check
-			// 0: Main (Player View)
-			// 1: Camera (Photo/Stream)
-			// 2: Mirror
-			
-			// 1. Mirror Exclusion
 			if ( _VRChatCameraMode == 2 ) discard;
-
-			// 2. VR HMD Exclusion (Mode 0)
-			// Check if projection is asymmetric (typical of VR eyes)
-			// unity_CameraProjection[0][2] is usually non-zero for off-center projection
 			float asymmetric = abs( unity_CameraProjection[0][2] );
 			bool isVR = asymmetric > 0.001;
 

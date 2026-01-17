@@ -60,7 +60,7 @@ MonoBehaviour:
   allowSelf: 1
   allowOthers: 1
   receiverType: 2
-  parameter: CameraProximity
+  parameter: ProximitySensor
   minVelocity: 0.05
 --- !u!114 &1822163366163792291
 MonoBehaviour:
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parameters:
-  - nameOrPrefix: CameraProximity
+  - nameOrPrefix: ProximitySensor
     remapTo: 
     internalParameter: 0
     isPrefix: 0
