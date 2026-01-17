@@ -212,8 +212,8 @@ Shader "Marumasa/VR180-Camera"
 			// アスペクト比マスククリップ
 			float screenAspect = _ScreenParams.x / _ScreenParams.y;
 			float targetAspect = _ScreenWidth / _ScreenHeight;
-			float aspectDiff = abs( sign( screenAspect - targetAspect ) );
-			float aspectMask = _DebugMode ? 1.0 : ( 1.0 - aspectDiff );
+			float aspectDiff = abs( screenAspect - targetAspect );
+			float aspectMask = _DebugMode ? 1.0 : ( aspectDiff < 0.01 ? 1.0 : 0.0 );
 			float squareScreenMask = abs( sign( _ScreenParams.x - _ScreenParams.y ) );
 			
 			clip( finalColor.a * squareScreenMask * aspectMask - _Cutoff );
