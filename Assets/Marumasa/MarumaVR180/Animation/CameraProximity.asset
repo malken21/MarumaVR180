@@ -6,7 +6,7 @@ BlendTree:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: CameraProximity BlendTree
+  m_Name: CameraProximity
   m_Childs:
   - serializedVersion: 2
     m_Motion: {fileID: 7400000, guid: 7cd138f9a32e5494f815c75f37070561, type: 2}
