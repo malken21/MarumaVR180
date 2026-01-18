@@ -131,7 +131,7 @@ PrefabInstance:
     - target: {fileID: 2186668490276249192, guid: eba67024fced3344298c935795a07bc9,
         type: 3}
       propertyPath: m_Name
-      value: DisplayBox
+      value: FormatBox
       objectReference: {fileID: 0}
     - target: {fileID: 6248161985806358273, guid: eba67024fced3344298c935795a07bc9,
         type: 3}
@@ -255,7 +255,7 @@ PrefabInstance:
     - target: {fileID: 7384898924072736115, guid: 4f1d72d1c03b27e48be90f5ef1f4a2fd,
         type: 3}
       propertyPath: m_Name
-      value: DisplayBox (1)
+      value: PreviewBox
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

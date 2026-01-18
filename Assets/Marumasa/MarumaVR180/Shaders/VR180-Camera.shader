@@ -139,25 +139,26 @@ Shader "Marumasa/VR180-Camera"
 			const float atlasDOWN_offsetX = 0.75;
 			
 			// 片目のみ計算・サンプリング
+			const float margin = 0.002;
 			if( isRightEye > 0.5 )
 			{
 				// === 右目 ===
 
 				// 右面 (+X)
-				float2 uvRightL = saturate( RemapUV( projectedYZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
+				float2 uvRightL = clamp( RemapUV( projectedYZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ), margin, 1.0 - margin );
 				float2 uvRightL_swapped = float2( uvRightL.y, uvRightL.x );
 				half maskRightL = ComputeFaceMask( uvRightL ) * saturate( ceil( sphereVector.x ) );
 				
 				// 背面 (-Z)
-				float2 uvRightR = saturate( RemapUV( projectedXY, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
+				float2 uvRightR = clamp( RemapUV( projectedXY, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ), margin, 1.0 - margin );
 				half maskRightR = ComputeFaceMask( uvRightR ) * saturate( ceil( -sphereVector.z ) );
 				
 				// 上面 (+Y)
-				float2 uvRightUpRaw = saturate( RemapUV( projectedXZ, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
+				float2 uvRightUpRaw = clamp( RemapUV( projectedXZ, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ), margin, 1.0 - margin );
 				half maskUp = ComputeFaceMask( uvRightUpRaw ) * saturate( ceil( sphereVector.y ) );
 				
 				// 下面 (-Y)
-				float2 uvRightDownRaw = saturate( RemapUV( projectedXZ, float2( 1, 1 ), float2( -1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
+				float2 uvRightDownRaw = clamp( RemapUV( projectedXZ, float2( 1, 1 ), float2( -1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ), margin, 1.0 - margin );
 				half maskDown = ComputeFaceMask( uvRightDownRaw ) * saturate( ceil( -sphereVector.y ) );
 
 				// UV合成
@@ -175,20 +176,20 @@ Shader "Marumasa/VR180-Camera"
 				// === 左目 ===
 
 				// 左面 (-X)
-				float2 uvLeftL = saturate( RemapUV( projectedYZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
+				float2 uvLeftL = clamp( RemapUV( projectedYZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ), margin, 1.0 - margin );
 				float2 uvLeftL_swapped = float2( uvLeftL.y, uvLeftL.x );
 				half maskLeftL = ComputeFaceMask( uvLeftL ) * saturate( ceil( -sphereVector.x ) );
 
 				// 正面 (+Z)
-				float2 uvLeftR = saturate( RemapUV( projectedXY, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
+				float2 uvLeftR = clamp( RemapUV( projectedXY, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ), margin, 1.0 - margin );
 				half maskLeftR = ComputeFaceMask( uvLeftR ) * saturate( ceil( sphereVector.z ) );
 
 				// 上面 (+Y)
-				float2 uvUp = saturate( RemapUV( projectedXZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
+				float2 uvUp = clamp( RemapUV( projectedXZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ), margin, 1.0 - margin );
 				half maskUp = ComputeFaceMask( uvUp ) * saturate( ceil( sphereVector.y ) );
 
 				// 下面 (-Y)
-				float2 uvDown = saturate( RemapUV( projectedXZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
+				float2 uvDown = clamp( RemapUV( projectedXZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ), margin, 1.0 - margin );
 				half maskDown = ComputeFaceMask( uvDown ) * saturate( ceil( -sphereVector.y ) );
 
 				// UV合成
