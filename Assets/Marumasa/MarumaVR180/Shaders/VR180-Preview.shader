@@ -112,7 +112,7 @@ Shader "Marumasa/VR180-Preview"
                 }
 
                 // テクスチャ境界の滲みを防ぐため、0.0-1.0の範囲をわずかに内側にクランプ
-                float margin = 0.002;
+                float margin = 0.001;
                 u_local = clamp(u_local, margin, 1.0 - margin);
                 v_local = clamp(v_local, margin, 1.0 - margin);
 
