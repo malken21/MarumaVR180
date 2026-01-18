@@ -1,9 +1,10 @@
-Shader "Custom/VisionJack4x1"
+Shader "Marumasa/VR180-Preview"
 {
     Properties
     {
         // 右、前、上、下 の順に並んだ 4:1 のテクスチャ
         [NoScaleOffset] _MainTex ("4:1 Texture (R, F, U, D)", 2D) = "black" {}
+        [NoScaleOffset] _RightTex ("Right Eye Texture (Optional)", 2D) = "black" {}
         _Exposure ("Exposure (Brightness)", Range(0, 8)) = 1.0
     }
     SubShader
@@ -25,21 +26,28 @@ Shader "Custom/VisionJack4x1"
             struct appdata
             {
                 float4 vertex : POSITION;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct v2f
             {
                 float4 vertex : SV_POSITION;
                 float3 worldViewDir : TEXCOORD0;
+                UNITY_VERTEX_OUTPUT_STEREO
             };
 
             sampler2D _MainTex;
+            sampler2D _RightTex;
             float _Exposure;
 
             // 頂点シェーダーは前回と同じく視線ベクトルを計算
             v2f vert (appdata v)
             {
                 v2f o;
+                UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_INITIALIZE_OUTPUT(v2f, o);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+                
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
                 o.worldViewDir = worldPos - _WorldSpaceCameraPos;
@@ -116,13 +124,22 @@ Shader "Custom/VisionJack4x1"
 
             fixed4 frag (v2f i) : SV_Target
             {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+
                 float3 viewDir = normalize(i.worldViewDir);
                 
                 float2 textureUV;
                 float mask;
 
+                // 45度反時計回りに回転
+                float s = 0.70710678;
+                float c = 0.70710678;
+                float3 rotDir = viewDir;
+                rotDir.x = viewDir.x * c + viewDir.z * s;
+                rotDir.z = -viewDir.x * s + viewDir.z * c;
+
                 // UVとマスクを計算
-                CalculateCubeUV(viewDir, textureUV, mask);
+                CalculateCubeUV(rotDir, textureUV, mask);
 
                 // マスクが0なら黒を出力して終了
                 // step関数を使って分岐を避ける書き方もできますが、分かりやすさ優先でifを使用
@@ -132,7 +149,17 @@ Shader "Custom/VisionJack4x1"
                 }
 
                 // 計算したUVで2Dテクスチャをサンプリング
-                fixed4 col = tex2D(_MainTex, textureUV);
+                // ステレオレンダリング対応: 右目は _RightTex を使用
+                fixed4 col;
+                if (unity_StereoEyeIndex == 0)
+                {
+                     col = tex2D(_MainTex, textureUV);
+                }
+                else
+                {
+                     col = tex2D(_RightTex, textureUV);
+                }
+                
                 col.rgb *= _Exposure;
 
                 return col;
