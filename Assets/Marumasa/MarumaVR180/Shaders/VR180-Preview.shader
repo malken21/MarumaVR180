@@ -5,7 +5,7 @@ Shader "Marumasa/VR180-Preview"
         // 右、前、上、下 の順に並んだ 4:1 のテクスチャ
         [NoScaleOffset] _MainTex ("4:1 Texture (R, F, U, D)", 2D) = "black" {}
         [NoScaleOffset] _RightTex ("Right Eye Texture (Optional)", 2D) = "black" {}
-        _Exposure ("Exposure (Brightness)", Range(0, 8)) = 1.0
+
     }
     SubShader
     {
@@ -37,7 +37,7 @@ Shader "Marumasa/VR180-Preview"
 
             sampler2D _MainTex;
             sampler2D _RightTex;
-            float _Exposure;
+
 
             // 頂点シェーダーは前回と同じく視線ベクトルを計算
             v2f vert (appdata v)
@@ -159,7 +159,7 @@ Shader "Marumasa/VR180-Preview"
                      col = tex2D(_RightTex, textureUV);
                 }
                 
-                col.rgb *= _Exposure;
+
 
                 return col;
             }
