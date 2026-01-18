@@ -55,8 +55,6 @@ Shader "Marumasa/VR180-Camera"
 		void vertexDataFunc( inout appdata_full v, out Input o )
 		{
 			UNITY_INITIALIZE_OUTPUT( Input, o );
-			float3 positionOS = v.vertex.xyz;
-			v.vertex.xyz += ( positionOS * 10 );
 			v.vertex.w = 1;
 		}
 
@@ -84,6 +82,14 @@ Shader "Marumasa/VR180-Camera"
 		void surf( Input i, inout SurfaceOutput o )
 		{
 			if ( _VRChatCameraMode == 2 ) discard;
+
+			// アスペクト比チェック
+			float screenAspect = _ScreenParams.x / _ScreenParams.y;
+			float targetAspect = _ScreenWidth / _ScreenHeight;
+			float aspectDiff = abs( screenAspect - targetAspect );
+			
+			if ( _DebugMode < 0.5 && aspectDiff >= 0.01 ) discard;
+
 			float asymmetric = abs( unity_CameraProjection[0][2] );
 			bool isVR = asymmetric > 0.001;
 
@@ -209,14 +215,10 @@ Shader "Marumasa/VR180-Camera"
 			o.Emission = finalColor.rgb;
 			o.Alpha = 1;
 
-			// アスペクト比マスククリップ
-			float screenAspect = _ScreenParams.x / _ScreenParams.y;
-			float targetAspect = _ScreenWidth / _ScreenHeight;
-			float aspectDiff = abs( screenAspect - targetAspect );
-			float aspectMask = _DebugMode ? 1.0 : ( aspectDiff < 0.01 ? 1.0 : 0.0 );
+			// 正方形スクリーンマスク
 			float squareScreenMask = abs( sign( _ScreenParams.x - _ScreenParams.y ) );
 			
-			clip( finalColor.a * squareScreenMask * aspectMask - _Cutoff );
+			clip( finalColor.a * squareScreenMask - _Cutoff );
 		}
 
 		ENDCG
