@@ -36,7 +36,7 @@ Shader "Marumasa/ChainLine"
                 float2 uv : TEXCOORD0;
                 UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
-                float3 worldPos : TEXCOORD1;
+                float dist : TEXCOORD1;
             };
 
             sampler2D _MainTex;
@@ -50,7 +50,12 @@ Shader "Marumasa/ChainLine"
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 // _MainTex_ST might not be set if not in Properties, but safe to use TRANSFORM_TEX if we define it
                 o.uv = v.uv; 
-                o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+
+                // オブジェクトのZ軸スケールを取得
+                float scaleZ = length(float3(unity_ObjectToWorld[0].z, unity_ObjectToWorld[1].z, unity_ObjectToWorld[2].z));
+                // ローカルZ位置にスケールを掛けて、実世界での距離（Z軸沿い）を算出
+                o.dist = v.vertex.z * scaleZ;
+
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
@@ -60,17 +65,8 @@ Shader "Marumasa/ChainLine"
                 // 正方形のカメラ（アスペクト比1:1）の場合は描画しない
                 if (abs(_ScreenParams.x - _ScreenParams.y) < 0.1) clip(-1);
 
-                // ローカル座標に変換
-                float3 localPos = mul(unity_WorldToObject, float4(i.worldPos, 1.0)).xyz;
-                
-                // オブジェクトのZ軸スケールを取得
-                float scaleZ = length(float3(unity_ObjectToWorld[0].z, unity_ObjectToWorld[1].z, unity_ObjectToWorld[2].z));
-                
-                // ローカルZ位置にスケールを掛けて、実世界での距離（Z軸沿い）を算出
-                float dist = localPos.z * scaleZ;
-                
                 // 0.2m (200mm) 周期で 0.1m (100mm) ごとに色を切り替え
-                fixed4 c = (frac(dist / 0.2) < 0.5) ? _Color : _Color2;
+                fixed4 c = (frac(i.dist / 0.2) < 0.5) ? _Color : _Color2;
                 
                 // _MainTex logic if needed, previously: c *= tex2D (_MainTex, IN.uv_MainTex);
                 // Note: TRANSFORM_TEX not strictly needed if _MainTex_ST not populated, but good practice.
