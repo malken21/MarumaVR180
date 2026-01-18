@@ -9,10 +9,17 @@ Shader "Marumasa/VR180-Preview"
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
-        LOD 100
-
-        Cull Front
+	Tags
+		{
+			"RenderType" = "Overlay"
+			"Queue" = "Overlay+1000"
+			"DisableBatching" = "True"
+			"IsEmissive" = "true"
+		}
+		
+		Cull Front
+		ZWrite On
+		ZTest Always
 
         Pass
         {
@@ -125,6 +132,10 @@ Shader "Marumasa/VR180-Preview"
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 
+                // 正方形のカメラ（アスペクト比1:1）の場合は描画しない
+                float squareScreenMask = abs(sign(_ScreenParams.x - _ScreenParams.y));
+                clip(squareScreenMask - 0.5);
+
                 float3 viewDir = normalize(i.worldViewDir);
                 
                 float2 textureUV;
@@ -150,7 +161,7 @@ Shader "Marumasa/VR180-Preview"
                 // 計算したUVで2Dテクスチャをサンプリング
                 // ステレオレンダリング対応: 右目は _RightTex を使用
                 fixed4 col;
-                 if (unity_StereoEyeIndex == 0)
+                if (unity_StereoEyeIndex == 0)
                 {
                      col = tex2D(_LeftEyeTex, textureUV);
                 }
