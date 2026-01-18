@@ -38,7 +38,7 @@ Shader "Marumasa/VR180-Preview"
             struct v2f
             {
                 float4 vertex : SV_POSITION;
-                float3 objViewDir : TEXCOORD0;
+                float3 viewDir : TEXCOORD0;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -55,9 +55,13 @@ Shader "Marumasa/VR180-Preview"
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                // オブジェクト空間での視線ベクトル (Vertex -> Camera の逆、つまり Camera -> Vertex)
-                // ObjSpaceViewDirは (Camera - Vertex) なので、符号を反転させる
-                o.objViewDir = -ObjSpaceViewDir(v.vertex);
+                // ビルボード的な挙動にするため、ビュースペース（カメラ空間）での位置を使用
+                // Unityのビュースペースはカメラが原点で、前方(-Z)を向いている
+                // そのため、頂点位置そのものがカメラからのベクトルになる
+                float3 viewPos = UnityObjectToViewPos(v.vertex);
+                
+                // Zを反転して、カメラの前方(+Z)を向くように調整
+                o.viewDir = float3(viewPos.x, viewPos.y, -viewPos.z);
                 return o;
             }
 
@@ -153,7 +157,7 @@ Shader "Marumasa/VR180-Preview"
                 float squareScreenMask = abs(sign(_ScreenParams.x - _ScreenParams.y));
                 clip(squareScreenMask - 0.5);
 
-                float3 viewDir = normalize(i.objViewDir);
+                float3 viewDir = normalize(i.viewDir);
                 
                 float2 textureUV;
                 float mask;
