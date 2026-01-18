@@ -44,6 +44,8 @@ Shader "Marumasa/VR180-Camera"
 
 		uniform sampler2D _LeftEyeTex;
 		uniform sampler2D _RightEyeTex;
+		uniform float4 _LeftEyeTex_TexelSize;
+		uniform float4 _RightEyeTex_TexelSize;
 
 		uniform float _DebugMode;
 		uniform float _ScreenWidth;
@@ -147,27 +149,36 @@ Shader "Marumasa/VR180-Camera"
 			const float atlasUP_offsetX   = 0.50;
 			const float atlasDOWN_offsetX = 0.75;
 			
-			// 片目のみ計算・サンプリング
+			float2 uvPaddingPtrn1; // For Non-rotated faces (x->AtlasX, y->AtlasY)
+			float2 uvPaddingPtrn2; // For Rotated faces (y->AtlasX, x->AtlasY)
+
 			if( isRightEye > 0.5 )
 			{
+				uvPaddingPtrn1 = float2( _RightEyeTex_TexelSize.x * 2.0, _RightEyeTex_TexelSize.y * 0.5 );
+				uvPaddingPtrn2 = float2( uvPaddingPtrn1.y, uvPaddingPtrn1.x );
+
 				// === 右目 ===
 
 				// 右面 (+X)
-				float2 uvRightL = saturate( RemapUV( projectedYZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
+				float2 uvRightLRaw = RemapUV( projectedYZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) );
+				float2 uvRightL = clamp( uvRightLRaw, uvPaddingPtrn2, 1.0 - uvPaddingPtrn2 );
 				float2 uvRightL_swapped = float2( uvRightL.y, uvRightL.x );
-				half maskRightL = ComputeFaceMask( uvRightL ) * saturate( ceil( sphereVector.x ) );
+				half maskRightL = ComputeFaceMask( saturate( uvRightLRaw ) ) * saturate( ceil( sphereVector.x ) );
 				
 				// 背面 (-Z)
-				float2 uvRightR = saturate( RemapUV( projectedXY, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				half maskRightR = ComputeFaceMask( uvRightR ) * saturate( ceil( -sphereVector.z ) );
+				float2 uvRightRRaw = RemapUV( projectedXY, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
+				float2 uvRightR = clamp( uvRightRRaw, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
+				half maskRightR = ComputeFaceMask( saturate( uvRightRRaw ) ) * saturate( ceil( -sphereVector.z ) );
 				
 				// 上面 (+Y)
-				float2 uvRightUpRaw = saturate( RemapUV( projectedXZ, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				half maskUp = ComputeFaceMask( uvRightUpRaw ) * saturate( ceil( sphereVector.y ) );
+				float2 uvRightUpRawVal = RemapUV( projectedXZ, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
+				float2 uvRightUpRaw = clamp( uvRightUpRawVal, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
+				half maskUp = ComputeFaceMask( saturate( uvRightUpRawVal ) ) * saturate( ceil( sphereVector.y ) );
 				
 				// 下面 (-Y)
-				float2 uvRightDownRaw = saturate( RemapUV( projectedXZ, float2( 1, 1 ), float2( -1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				half maskDown = ComputeFaceMask( uvRightDownRaw ) * saturate( ceil( -sphereVector.y ) );
+				float2 uvRightDownRawVal = RemapUV( projectedXZ, float2( 1, 1 ), float2( -1, -1 ), float2( 0, 0 ), float2( 1, 1 ) );
+				float2 uvRightDownRaw = clamp( uvRightDownRawVal, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
+				half maskDown = ComputeFaceMask( saturate( uvRightDownRawVal ) ) * saturate( ceil( -sphereVector.y ) );
 
 				// UV合成
 				finalUV += float2( uvRightL_swapped.x * 0.25 + atlasL_offsetX, uvRightL_swapped.y ) * maskRightL;
@@ -181,24 +192,32 @@ Shader "Marumasa/VR180-Camera"
 			}
 			else
 			{
+				uvPaddingPtrn1 = float2( _LeftEyeTex_TexelSize.x * 2.0, _LeftEyeTex_TexelSize.y * 0.5 );
+				uvPaddingPtrn2 = float2( uvPaddingPtrn1.y, uvPaddingPtrn1.x );
+
 				// === 左目 ===
 
 				// 左面 (-X)
-				float2 uvLeftL = saturate( RemapUV( projectedYZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
+				// Rotated
+				float2 uvLeftLRaw = RemapUV( projectedYZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
+				float2 uvLeftL = clamp( uvLeftLRaw, uvPaddingPtrn2, 1.0 - uvPaddingPtrn2 );
 				float2 uvLeftL_swapped = float2( uvLeftL.y, uvLeftL.x );
-				half maskLeftL = ComputeFaceMask( uvLeftL ) * saturate( ceil( -sphereVector.x ) );
+				half maskLeftL = ComputeFaceMask( saturate( uvLeftLRaw ) ) * saturate( ceil( -sphereVector.x ) );
 
 				// 正面 (+Z)
-				float2 uvLeftR = saturate( RemapUV( projectedXY, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				half maskLeftR = ComputeFaceMask( uvLeftR ) * saturate( ceil( sphereVector.z ) );
+				float2 uvLeftRRaw = RemapUV( projectedXY, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
+				float2 uvLeftR = clamp( uvLeftRRaw, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
+				half maskLeftR = ComputeFaceMask( saturate( uvLeftRRaw ) ) * saturate( ceil( sphereVector.z ) );
 
 				// 上面 (+Y)
-				float2 uvUp = saturate( RemapUV( projectedXZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				half maskUp = ComputeFaceMask( uvUp ) * saturate( ceil( sphereVector.y ) );
+				float2 uvUpRawVal = RemapUV( projectedXZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) );
+				float2 uvUp = clamp( uvUpRawVal, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
+				half maskUp = ComputeFaceMask( saturate( uvUpRawVal ) ) * saturate( ceil( sphereVector.y ) );
 
 				// 下面 (-Y)
-				float2 uvDown = saturate( RemapUV( projectedXZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				half maskDown = ComputeFaceMask( uvDown ) * saturate( ceil( -sphereVector.y ) );
+				float2 uvDownRawVal = RemapUV( projectedXZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
+				float2 uvDown = clamp( uvDownRawVal, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
+				half maskDown = ComputeFaceMask( saturate( uvDownRawVal ) ) * saturate( ceil( -sphereVector.y ) );
 
 				// UV合成
 				finalUV += float2( uvLeftL_swapped.x * 0.25 + atlasL_offsetX, uvLeftL_swapped.y ) * maskLeftL;
