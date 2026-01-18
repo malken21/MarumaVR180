@@ -9,7 +9,7 @@ Shader "Marumasa/VR180-Preview"
     }
     SubShader
     {
-	Tags
+	    Tags
 		{
 			"RenderType" = "Overlay"
 			"Queue" = "Overlay+1000"

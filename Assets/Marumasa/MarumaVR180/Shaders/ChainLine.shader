@@ -11,6 +11,8 @@ Shader "Marumasa/ChainLine"
         Tags { "RenderType"="Opaque" "Queue"="Geometry" }
         LOD 100
 
+		Cull Off
+
         Pass
         {
             CGPROGRAM
