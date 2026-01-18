@@ -29,7 +29,7 @@ Shader "Marumasa/ChainLine"
             struct v2f
             {
                 float4 vertex : SV_POSITION;
-                float3 worldPos : TEXCOORD0;
+                float4 localPos : TEXCOORD0;
             };
 
             fixed4 _Color;
@@ -39,20 +39,12 @@ Shader "Marumasa/ChainLine"
             v2f vert (appdata v)
             {
                 v2f o;
-                
-                // オブジェクトのスケールを無視して、回転と位置のみを適用する
-                // unity_ObjectToWorld行列から正規化された基底ベクトル（回転成分）を抽出
-                float3 right = normalize(unity_ObjectToWorld._m00_m10_m20);
-                float3 up = normalize(unity_ObjectToWorld._m01_m11_m21);
-                float3 forward = normalize(unity_ObjectToWorld._m02_m12_m22);
-                float3 origin = unity_ObjectToWorld._m03_m13_m23;
 
-                // Z軸方向に無限に伸ばす（10000倍）
-                float z = v.vertex.z * 10000;
                 
-                // ローカル座標をワールド座標へ変換（スケール無視）
-                // X, Y 成分に太さ(_Thickness)を適用
-                float3 worldPos = origin + right * (v.vertex.x * _Thickness) + up * (v.vertex.y * _Thickness) + forward * z;
+                float4 pos = v.vertex;
+                pos.x *= _Thickness;
+                pos.y *= _Thickness;
+                pos.z *= 10000; // Z軸方向に無限に伸ばす（10000倍）
 
                 o.worldPos = worldPos;
                 o.vertex = mul(UNITY_MATRIX_VP, float4(worldPos, 1.0));
@@ -65,13 +57,8 @@ Shader "Marumasa/ChainLine"
                 // 正方形のカメラ（アスペクト比1:1）の場合は描画しない for VR180-Camera
                 if (abs(_ScreenParams.x - _ScreenParams.y) < 0.1) discard;
 
-                // オブジェクト原点からの距離(球状)だと原点付近でパターンが歪む(丸くなる)ため、
-                // Z軸ベクトルへの射影距離(直線性)を使用する
-                float3 objectOrigin = mul(unity_ObjectToWorld, float4(0,0,0,1)).xyz;
-                float3 objectZAxis = normalize(mul(unity_ObjectToWorld, float4(0,0,1,0)).xyz);
-                
-                float3 vec = i.worldPos - objectOrigin;
-                float dist = abs(dot(vec, objectZAxis));
+                // 距離はローカル座標のZ成分から直接計算可能
+                float dist = abs(i.localPos.z);
                 
                 float cycle = 0.1;
 
