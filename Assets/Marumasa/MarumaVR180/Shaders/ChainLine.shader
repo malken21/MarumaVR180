@@ -9,6 +9,8 @@ Shader "Marumasa/ChainLine"
         Tags { "RenderType"="BodySurface" }
         LOD 100
 
+        Cull Off
+
         Pass
         {
             CGPROGRAM
