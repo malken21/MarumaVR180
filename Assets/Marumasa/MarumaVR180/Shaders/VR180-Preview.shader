@@ -85,6 +85,22 @@ Shader "Marumasa/VR180-Preview"
                 }
                 else if (absDir.y >= absDir.x && absDir.y >= absDir.z)
                 {
+                    // 上下面のマスク処理: 水平方向のブラックアウト領域に合わせる
+                    // X軸方向が支配的かZ軸方向が支配的かで判定
+                    if (absDir.x >= absDir.z)
+                    {
+                        // X軸方向 (右 or 左)
+                        // 水平方向と同様に左側は黒
+                        if (dir.x < 0) { mask = 0.0; return; }
+                    }
+                    else
+                    {
+                        // Z軸方向 (前 or 後)
+                        // 水平方向と同様に後ろ側は黒
+                        if (dir.z < 0) { mask = 0.0; return; }
+                    }
+
+
                     if (dir.y > 0) {
                         // 上面 (+Y) -> テクスチャの3番目 (Offset 0.5)
                         // 90度右回転: u_new = v_old, v_new = 1.0 - u_old
