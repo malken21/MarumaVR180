@@ -60,7 +60,7 @@ Shader "Marumasa/ChainLine"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                // 正方形のカメラ（アスペクト比1:1）の場合は描画しない for VR180Preview
+                // 正方形のカメラ（アスペクト比1:1）の場合は描画しない for VR180-Camera
                 if (abs(_ScreenParams.x - _ScreenParams.y) < 0.1) discard;
 
                 // オブジェクト原点からの距離(球状)だと原点付近でパターンが歪む(丸くなる)ため、
