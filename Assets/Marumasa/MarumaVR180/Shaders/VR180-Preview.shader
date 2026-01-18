@@ -157,17 +157,19 @@ Shader "Marumasa/VR180-Preview"
                 float squareScreenMask = abs(sign(_ScreenParams.x - _ScreenParams.y));
                 clip(squareScreenMask - 0.5);
 
-                float3 viewDir = normalize(i.viewDir);
+                // float3 viewDir = normalize(i.viewDir); // Normalize is unnecessary for projection ratios
+                float3 viewDir = i.viewDir;
                 
                 float2 textureUV;
                 float mask;
 
-                // 45度反時計回りに回転
-                float s = 0.70710678;
-                float c = 0.70710678;
+                // 45度反時計回りに回転 (sin45 = cos45 = 0.70710678)
+                // rot.x = x * c + z * s = (x + z) * c
+                // rot.z = -x * s + z * c = (z - x) * c
                 float3 rotDir = viewDir;
-                rotDir.x = viewDir.x * c + viewDir.z * s;
-                rotDir.z = -viewDir.x * s + viewDir.z * c;
+                float k = 0.70710678;
+                rotDir.x = (viewDir.x + viewDir.z) * k;
+                rotDir.z = (viewDir.z - viewDir.x) * k;
 
                 // UVとマスクを計算
                 CalculateCubeUV(rotDir, textureUV, mask);
