@@ -17,7 +17,7 @@ Shader "Marumasa/VR180-Camera"
 		Tags
 		{
 			"RenderType" = "Overlay"
-			"Queue" = "Overlay+1000"
+			"Queue" = "Overlay+1001"
 			"DisableBatching" = "True"
 			"IsEmissive" = "true"
 		}
