@@ -71,7 +71,6 @@ Shader "Custom/VisionJack4x1"
                 }
                 else if (absDir.y >= absDir.x && absDir.y >= absDir.z)
                 {
-                    // Y軸方向 (上 or 下)
                     if (dir.y > 0) {
                         // 上面 (+Y) -> テクスチャの3番目 (Offset 0.5)
                         // 90度右回転: u_new = v_old, v_new = 1.0 - u_old
@@ -83,12 +82,12 @@ Shader "Custom/VisionJack4x1"
                         u_offset = 0.50;
                     } else {
                         // 下面 (-Y) -> テクスチャの右端 (Offset 0.75)
-                        // 90度右回転: u_new = v_old, v_new = 1.0 - u_old
+                        // -90度(左)回転: u_new = 1.0 - v_old, v_new = u_old
                         float u_orig = 0.5 * ( dir.x / absDir.y) + 0.5;
                         float v_orig = 0.5 * ( dir.z / absDir.y) + 0.5;
 
-                        u_local = v_orig;
-                        v_local = 1.0 - u_orig;
+                        u_local = 1.0 - v_orig;
+                        v_local = u_orig;
                         u_offset = 0.75;
                     }
                 }
@@ -108,8 +107,6 @@ Shader "Custom/VisionJack4x1"
                 // Uは全体を1/4に縮小し、計算したオフセットを加える
                 uv.x = u_local * 0.25 + u_offset;
                 uv.y = v_local;
-                // ※テクスチャの境界で色が滲むのを防ぐため、UVをわずかに内側にクランプすると安全ですが、
-                // まずは単純な実装としています。必要であれば clamp(u_local, 0.001, 0.999) などで調整します。
             }
 
             fixed4 frag (v2f i) : SV_Target
