@@ -6,17 +6,14 @@ Shader "Marumasa/VR180-Preview"
         [NoScaleOffset] _MainTex ("4:1 Texture (R, F, U, D)", 2D) = "black" {}
         [NoScaleOffset] _RightTex ("Right Eye Texture (Optional)", 2D) = "black" {}
         _Exposure ("Exposure (Brightness)", Range(0, 8)) = 1.0
-
-		_ScreenWidth( "Screen Width", Float ) = 16
-		_ScreenHeight( "Screen Height", Float ) = 9
-		[Toggle] _DebugMode( "DebugMode", Float ) = 0
     }
     SubShader
     {
         Tags { "RenderType"="Opaque" "Queue"="Geometry" }
         LOD 100
 
-        Cull Front 
+        // 両面描画
+        Cull Off 
 
         Pass
         {
@@ -42,11 +39,6 @@ Shader "Marumasa/VR180-Preview"
             sampler2D _MainTex;
             sampler2D _RightTex;
             float _Exposure;
-
-            float _DebugMode;
-            float _ScreenWidth;
-            float _ScreenHeight;
-            int _VRChatCameraMode;
 
             // 頂点シェーダーは前回と同じく視線ベクトルを計算
             v2f vert (appdata v)
@@ -135,24 +127,6 @@ Shader "Marumasa/VR180-Preview"
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 
                 float3 viewDir = normalize(i.worldViewDir);
-
-				// VRChatのカメラモードが2（三人称視点など）の場合は描画しない
-				if ( _VRChatCameraMode == 2 ) discard;
-
-				// アスペクト比の計算
-				float screenAspect = _ScreenParams.x / _ScreenParams.y;
-				float targetAspect = _ScreenWidth / _ScreenHeight;
-				float aspectDiff = abs( screenAspect - targetAspect );
-				
-				// デバッグモードが無効で、アスペクト比が一致しない場合は描画しない
-				if ( _DebugMode < 0.5 && aspectDiff >= 0.01 ) discard;
-
-				// 投影行列の非対称性からVRモードかどうかを判定
-				float asymmetric = abs( unity_CameraProjection[0][2] );
-				bool isVR = asymmetric > 0.001;
-
-				// VRChatカメラモードが0（First Person）かつVRモードの場合は描画しない
-				if ( _VRChatCameraMode == 0 && isVR ) discard;
                 
                 float2 textureUV;
                 float mask;
