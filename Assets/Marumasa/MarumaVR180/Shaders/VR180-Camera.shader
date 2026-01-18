@@ -2,18 +2,13 @@ Shader "Marumasa/VR180-Camera"
 {
 	Properties
 	{
-		// 左目用テクスチャ
 		[NoScaleOffset][SingleLineTexture] _LeftEyeTex( "LeftEye-Atlas", 2D ) = "black" {}
-		// 右目用テクスチャ
 		[NoScaleOffset][SingleLineTexture] _RightEyeTex( "RightEye-Atlas", 2D ) = "black" {}
-		
-		// 画面サイズ
+
 		_ScreenWidth( "Screen Width", Float ) = 16
 		_ScreenHeight( "Screen Height", Float ) = 9
-		
-		// デバッグ設定
+
 		[Toggle] _DebugMode( "DebugMode", Float ) = 0
-		_Cutoff( "Mask Clip Value", Float ) = 0.5
 		[HideInInspector] __dirty( "", Int ) = 1
 	}
 
@@ -22,7 +17,7 @@ Shader "Marumasa/VR180-Camera"
 		Tags
 		{
 			"RenderType" = "Overlay"
-			"Queue" = "Overlay+1000"
+			"Queue" = "Overlay+1001"
 			"DisableBatching" = "True"
 			"IsEmissive" = "true"
 		}
@@ -44,35 +39,31 @@ Shader "Marumasa/VR180-Camera"
 
 		uniform sampler2D _LeftEyeTex;
 		uniform sampler2D _RightEyeTex;
+		uniform float4 _LeftEyeTex_TexelSize;
+		uniform float4 _RightEyeTex_TexelSize;
 
 		uniform float _DebugMode;
 		uniform float _ScreenWidth;
 		uniform float _ScreenHeight;
-		uniform float _Cutoff = 0.5;
 		uniform int _VRChatCameraMode;
 
-		// 頂点シェーダー
+
 		void vertexDataFunc( inout appdata_full v, out Input o )
 		{
 			UNITY_INITIALIZE_OUTPUT( Input, o );
-			float3 positionOS = v.vertex.xyz;
-			v.vertex.xyz += ( positionOS * 10 );
 			v.vertex.w = 1;
 		}
 
-		// ライティング無効化
 		inline half4 LightingUnlit( SurfaceOutput s, half3 lightDir, half atten )
 		{
 			return half4( 0, 0, 0, s.Alpha );
 		}
 
-		// UVリマップ
 		float2 RemapUV( float2 value, float2 fromMin, float2 fromMax, float2 toMin, float2 toMax )
 		{
 			return toMin + ( value - fromMin ) * ( toMax - toMin ) / ( fromMax - fromMin );
 		}
 
-		// マスク計算
 		float ComputeFaceMask( float2 uv )
 		{
 			float2 floorUV = 1.0 - floor( uv );
@@ -80,21 +71,31 @@ Shader "Marumasa/VR180-Camera"
 			return floorUV.x * floorUV.y * ceilUV.x * ceilUV.y;
 		}
 
-		// サーフェスシェーダー
 		void surf( Input i, inout SurfaceOutput o )
 		{
+			// VRChatのカメラモードが2（三人称視点など）の場合は描画しない
 			if ( _VRChatCameraMode == 2 ) discard;
+
+			// アスペクト比の計算
+			float screenAspect = _ScreenParams.x / _ScreenParams.y;
+			float targetAspect = _ScreenWidth / _ScreenHeight;
+			float aspectDiff = abs( screenAspect - targetAspect );
+			
+			// デバッグモードが無効で、アスペクト比が一致しない場合は描画しない
+			if ( _DebugMode < 0.5 && aspectDiff >= 0.01 ) discard;
+
+			// 投影行列の非対称性からVRモードかどうかを判定
 			float asymmetric = abs( unity_CameraProjection[0][2] );
 			bool isVR = asymmetric > 0.001;
 
+			// VRChatカメラモードが0（First Person）かつVRモードの場合は描画しない
 			if ( _VRChatCameraMode == 0 && isVR ) discard;
 
-			// スクリーン座標の正規化
 			float4 screenPos = float4( i.screenPos.xyz, i.screenPos.w + 1e-7 );
 			float4 screenPosNorm = screenPos / screenPos.w;
 			screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? screenPosNorm.z : screenPosNorm.z * 0.5 + 0.5;
 
-			// 極座標変換
+			// スクリーン座標を極座標（方位角・仰角）に変換
 			float2 polarCoords = RemapUV(
 				screenPosNorm.xy,
 				float2( 0, 0 ), float2( 1, 1 ),
@@ -103,120 +104,159 @@ Shader "Marumasa/VR180-Camera"
 			float azimuth = polarCoords.x + radians( 45.0 );
 			float elevation = polarCoords.y / 2.0;
 
-			// 球面ベクトル
 			float cosElevation = cos( elevation );
+			// 球面上のベクトルを計算
 			float3 sphereVector = float3(
 				cosElevation * sin( azimuth ),
 				sin( elevation ),
 				cosElevation * cos( azimuth )
 			);
 
-			// 投影角度の計算
-			float3 vecYZ = normalize( float3( 0.0, sphereVector.y, sphereVector.z ) );
-			float3 vecXY = normalize( float3( sphereVector.x, sphereVector.y, 0.0 ) );
-			float3 vecXZ = normalize( float3( sphereVector.x, 0.0, sphereVector.z ) );
-
-			float dotYZ = dot( vecYZ, sphereVector );
-			float dotXY = dot( vecXY, sphereVector );
-			float dotXZ = dot( vecXZ, sphereVector );
-
-			float3 projectionAngles = float3( dotYZ, dotXY, dotXZ );
-			float3 sinAngles = sqrt( 1.0 - ( projectionAngles * projectionAngles ) );
-
-			// 投影UVの計算
-			float2 projectedYZ = ( 1.0 / sinAngles.x ) * sphereVector.yz;
-			float2 projectedXY = ( 1.0 / sinAngles.y ) * sphereVector.xy;
-			float2 projectedXZ = ( 1.0 / sinAngles.z ) * sphereVector.xz;
-
-			// 左右判定
+			// 右目かどうかを判定
 			half isRightEye = saturate( ceil( -0.5 + screenPosNorm.x ) );
 			
 			float2 finalUV = 0;
 			half finalMask = 0;
 			float4 finalColor = 0;
 
-			// アトラスオフセット
 			const float atlasR_offsetX    = 0.00;
 			const float atlasL_offsetX    = 0.25;
 			const float atlasUP_offsetX   = 0.50;
 			const float atlasDOWN_offsetX = 0.75;
 			
-			// 片目のみ計算・サンプリング
-			if( isRightEye > 0.5 )
+			float2 uvPaddingPtrn1, uvPaddingPtrn2;
+			float4 texelSize;
+
+			if( isRightEye > 0.5 ) texelSize = _RightEyeTex_TexelSize;
+			else texelSize = _LeftEyeTex_TexelSize;
+
+			uvPaddingPtrn1 = float2( texelSize.x * 2.0, texelSize.y * 0.5 );
+			uvPaddingPtrn2 = float2( uvPaddingPtrn1.y, uvPaddingPtrn1.x );
+
+			float3 absVec = abs( sphereVector );
+			float maxComp = max( absVec.x, max( absVec.y, absVec.z ) );
+			
+			bool isValidFace = false;
+			float2 rawUV = 0;
+			float2 padding = uvPaddingPtrn1;
+			float offset = 0;
+			bool swap = false;
+			float faceMask = 0;
+
+			if ( isRightEye > 0.5 )
 			{
-				// === 右目 ===
-
-				// 右面 (+X)
-				float2 uvRightL = saturate( RemapUV( projectedYZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				float2 uvRightL_swapped = float2( uvRightL.y, uvRightL.x );
-				half maskRightL = ComputeFaceMask( uvRightL ) * saturate( ceil( sphereVector.x ) );
-				
-				// 背面 (-Z)
-				float2 uvRightR = saturate( RemapUV( projectedXY, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				half maskRightR = ComputeFaceMask( uvRightR ) * saturate( ceil( -sphereVector.z ) );
-				
-				// 上面 (+Y)
-				float2 uvRightUpRaw = saturate( RemapUV( projectedXZ, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				half maskUp = ComputeFaceMask( uvRightUpRaw ) * saturate( ceil( sphereVector.y ) );
-				
-				// 下面 (-Y)
-				float2 uvRightDownRaw = saturate( RemapUV( projectedXZ, float2( 1, 1 ), float2( -1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				half maskDown = ComputeFaceMask( uvRightDownRaw ) * saturate( ceil( -sphereVector.y ) );
-
-				// UV合成
-				finalUV += float2( uvRightL_swapped.x * 0.25 + atlasL_offsetX, uvRightL_swapped.y ) * maskRightL;
-				finalUV += float2( uvRightR.x * 0.25 + atlasR_offsetX, uvRightR.y ) * maskRightR;
-				finalUV += float2( uvRightUpRaw.x * 0.25 + atlasUP_offsetX, uvRightUpRaw.y ) * maskUp;
-				finalUV += float2( uvRightDownRaw.x * 0.25 + atlasDOWN_offsetX, uvRightDownRaw.y ) * maskDown;
-				
-				finalMask = maskRightL + maskRightR + maskUp + maskDown;
-				
-				finalColor = tex2D( _RightEyeTex, finalUV ) * finalMask;
+				// 右目の処理
+				if ( maxComp == absVec.y ) // 上面または下面
+				{
+					float2 proj = sphereVector.xz / absVec.y;
+					if ( sphereVector.y > 0 ) // 上面
+					{
+						rawUV = RemapUV( proj, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
+						offset = atlasUP_offsetX;
+					}
+					else // 下面
+					{
+						rawUV = RemapUV( proj, float2( 1, 1 ), float2( -1, -1 ), float2( 0, 0 ), float2( 1, 1 ) );
+						offset = atlasDOWN_offsetX;
+					}
+					isValidFace = true;
+				}
+				else if ( maxComp == absVec.x ) // 右目 左側面 (+X)
+				{
+					if ( sphereVector.x > 0 )
+					{
+						float2 proj = sphereVector.yz / absVec.x;
+						rawUV = RemapUV( proj, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) );
+						offset = atlasL_offsetX;
+						padding = uvPaddingPtrn2;
+						swap = true;
+						isValidFace = true;
+					}
+				}
+				else // 右目 右側面 (-Z)
+				{
+					if ( sphereVector.z < 0 )
+					{
+						float2 proj = sphereVector.xy / absVec.z;
+						rawUV = RemapUV( proj, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
+						offset = atlasR_offsetX;
+						isValidFace = true;
+					}
+				}
 			}
 			else
 			{
-				// === 左目 ===
-
-				// 左面 (-X)
-				float2 uvLeftL = saturate( RemapUV( projectedYZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				float2 uvLeftL_swapped = float2( uvLeftL.y, uvLeftL.x );
-				half maskLeftL = ComputeFaceMask( uvLeftL ) * saturate( ceil( -sphereVector.x ) );
-
-				// 正面 (+Z)
-				float2 uvLeftR = saturate( RemapUV( projectedXY, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				half maskLeftR = ComputeFaceMask( uvLeftR ) * saturate( ceil( sphereVector.z ) );
-
-				// 上面 (+Y)
-				float2 uvUp = saturate( RemapUV( projectedXZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				half maskUp = ComputeFaceMask( uvUp ) * saturate( ceil( sphereVector.y ) );
-
-				// 下面 (-Y)
-				float2 uvDown = saturate( RemapUV( projectedXZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) ) );
-				half maskDown = ComputeFaceMask( uvDown ) * saturate( ceil( -sphereVector.y ) );
-
-				// UV合成
-				finalUV += float2( uvLeftL_swapped.x * 0.25 + atlasL_offsetX, uvLeftL_swapped.y ) * maskLeftL;
-				finalUV += float2( uvLeftR.x * 0.25 + atlasR_offsetX, uvLeftR.y ) * maskLeftR;
-				finalUV += float2( uvUp.x * 0.25 + atlasUP_offsetX, uvUp.y ) * maskUp;
-				finalUV += float2( uvDown.x * 0.25 + atlasDOWN_offsetX, uvDown.y ) * maskDown;
-
-				finalMask = maskLeftL + maskLeftR + maskUp + maskDown;
-
-				finalColor = tex2D( _LeftEyeTex, finalUV ) * finalMask;
+				// 左目の処理
+				if ( maxComp == absVec.y ) // 上面または下面
+				{
+					float2 proj = sphereVector.xz / absVec.y;
+					if ( sphereVector.y > 0 ) // 上面
+					{
+						rawUV = RemapUV( proj, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) );
+						offset = atlasUP_offsetX;
+					}
+					else // 下面
+					{
+						rawUV = RemapUV( proj, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
+						offset = atlasDOWN_offsetX;
+					}
+					isValidFace = true;
+				}
+				else if ( maxComp == absVec.x ) // 左目 左側面 (-X)
+				{
+					if ( sphereVector.x < 0 )
+					{
+						float2 proj = sphereVector.yz / absVec.x;
+						rawUV = RemapUV( proj, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
+						offset = atlasL_offsetX;
+						padding = uvPaddingPtrn2;
+						swap = true;
+						isValidFace = true;
+					}
+				}
+				else // 左目 右側面 (+Z)
+				{
+					if ( sphereVector.z > 0 )
+					{
+						float2 proj = sphereVector.xy / absVec.z;
+						rawUV = RemapUV( proj, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
+						offset = atlasR_offsetX;
+						isValidFace = true;
+					}
+				}
 			}
 
-			// 出力
+			if ( isValidFace )
+			{
+				float2 clampedUV = clamp( rawUV, padding, 1.0 - padding );
+				
+				// 元のロジック（ピラミッド投影の有効性）に合わせてマスクを再計算
+				// ComputeFaceMask は元の (saturateされた) UV が 0-1 の範囲内にあるかを確認する。
+				// ドミナント軸で選択しているため、rawUV は自然に 0-1 の範囲内になるはずだが、
+				// ComputeFaceMask は念のためピラミッドの境界での滲みを防ぐ。
+				finalMask = ComputeFaceMask( saturate( rawUV ) );
+
+				if ( swap )
+				{
+					clampedUV = float2( clampedUV.y, clampedUV.x );
+				}
+
+				finalUV = float2( clampedUV.x * 0.25 + offset, clampedUV.y );
+				
+				if( isRightEye > 0.5 )
+					finalColor = tex2D( _RightEyeTex, finalUV );
+				else
+					finalColor = tex2D( _LeftEyeTex, finalUV );
+
+				finalColor *= finalMask;
+			}
+
 			o.Emission = finalColor.rgb;
 			o.Alpha = 1;
 
-			// アスペクト比マスククリップ
-			float screenAspect = _ScreenParams.x / _ScreenParams.y;
-			float targetAspect = _ScreenWidth / _ScreenHeight;
-			float aspectDiff = abs( screenAspect - targetAspect );
-			float aspectMask = _DebugMode ? 1.0 : ( aspectDiff < 0.01 ? 1.0 : 0.0 );
 			float squareScreenMask = abs( sign( _ScreenParams.x - _ScreenParams.y ) );
 			
-			clip( finalColor.a * squareScreenMask * aspectMask - _Cutoff );
+			clip( finalColor.a * squareScreenMask - 0.5 );
 		}
 
 		ENDCG
