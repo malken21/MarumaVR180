@@ -211,17 +211,14 @@ Shader "Marumasa/VR180-Camera"
 				float2 uvLeftR = clamp( uvLeftRRaw, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
 				half maskLeftR = ComputeFaceMask( saturate( uvLeftRRaw ) ) * saturate( ceil( sphereVector.z ) );
 
-				// 上面 (+Y)
 				float2 uvUpRawVal = RemapUV( projectedXZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) );
 				float2 uvUp = clamp( uvUpRawVal, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
 				half maskUp = ComputeFaceMask( saturate( uvUpRawVal ) ) * saturate( ceil( sphereVector.y ) );
 
-				// 下面 (-Y)
 				float2 uvDownRawVal = RemapUV( projectedXZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
 				float2 uvDown = clamp( uvDownRawVal, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
 				half maskDown = ComputeFaceMask( saturate( uvDownRawVal ) ) * saturate( ceil( -sphereVector.y ) );
 
-				// UV合成
 				finalUV += float2( uvLeftL_swapped.x * 0.25 + atlasL_offsetX, uvLeftL_swapped.y ) * maskLeftL;
 				finalUV += float2( uvLeftR.x * 0.25 + atlasR_offsetX, uvLeftR.y ) * maskLeftR;
 				finalUV += float2( uvUp.x * 0.25 + atlasUP_offsetX, uvUp.y ) * maskUp;
