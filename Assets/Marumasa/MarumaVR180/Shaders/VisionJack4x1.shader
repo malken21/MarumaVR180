@@ -103,6 +103,11 @@ Shader "Custom/VisionJack4x1"
                     } else { mask = 0.0; return; } // 後面は黒
                 }
 
+                // テクスチャ境界の滲みを防ぐため、0.0-1.0の範囲をわずかに内側にクランプ
+                float margin = 0.002;
+                u_local = clamp(u_local, margin, 1.0 - margin);
+                v_local = clamp(v_local, margin, 1.0 - margin);
+
                 // 4:1テクスチャ上の最終的なUVを計算
                 // Uは全体を1/4に縮小し、計算したオフセットを加える
                 uv.x = u_local * 0.25 + u_offset;
