@@ -1,4 +1,4 @@
-Shader "Marumasa/BodySurfaceShader"
+Shader "Marumasa/ChainLine"
 {
     Properties
     {
