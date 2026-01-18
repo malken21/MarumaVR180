@@ -12,6 +12,8 @@ Shader "Marumasa/ChainLine"
         Tags { "RenderType"="BodySurface" }
         LOD 200
 
+		Cull Off
+
         CGPROGRAM
         #pragma surface surf Standard fullforwardshadows
 
