@@ -111,22 +111,19 @@ Shader "Marumasa/VR180-Camera"
 				cosElevation * cos( azimuth )
 			);
 
-			// 投影角度の計算
-			float3 vecYZ = normalize( float3( 0.0, sphereVector.y, sphereVector.z ) );
-			float3 vecXY = normalize( float3( sphereVector.x, sphereVector.y, 0.0 ) );
-			float3 vecXZ = normalize( float3( sphereVector.x, 0.0, sphereVector.z ) );
-
-			float dotYZ = dot( vecYZ, sphereVector );
-			float dotXY = dot( vecXY, sphereVector );
-			float dotXZ = dot( vecXZ, sphereVector );
-
-			float3 projectionAngles = float3( dotYZ, dotXY, dotXZ );
-			float3 sinAngles = sqrt( 1.0 - ( projectionAngles * projectionAngles ) );
+			// 投影角度の計算 (最適化: sphereVectorは単位ベクトルのため、投影成分の余弦は各軸の絶対値となる)
+			// sinAngles.x = sqrt(1 - (y^2 + z^2)) = sqrt(x^2) = |x|
+			// sinAngles.y = sqrt(1 - (x^2 + y^2)) = sqrt(z^2) = |z|
+			// sinAngles.z = sqrt(1 - (x^2 + z^2)) = sqrt(y^2) = |y|
+			float3 sinAngles = abs( sphereVector.xzy );
 
 			// 投影UVの計算
-			float2 projectedYZ = ( 1.0 / sinAngles.x ) * sphereVector.yz;
-			float2 projectedXY = ( 1.0 / sinAngles.y ) * sphereVector.xy;
-			float2 projectedXZ = ( 1.0 / sinAngles.z ) * sphereVector.xz;
+			// ゼロ除算回避のためmaxを使用 (極点付近でのアーティファクト防止)
+			float3 safeSinAngles = max( sinAngles, 1e-6 );
+			
+			float2 projectedYZ = ( 1.0 / safeSinAngles.x ) * sphereVector.yz;
+			float2 projectedXY = ( 1.0 / safeSinAngles.y ) * sphereVector.xy;
+			float2 projectedXZ = ( 1.0 / safeSinAngles.z ) * sphereVector.xz;
 
 			// 左右判定
 			half isRightEye = saturate( ceil( -0.5 + screenPosNorm.x ) );
