@@ -89,6 +89,12 @@ Shader "Marumasa/VR180-Camera"
 
 			if ( _VRChatCameraMode == 0 && isVR ) discard;
 
+			// アスペクト比チェック
+			float screenAspect = _ScreenParams.x / _ScreenParams.y;
+			float targetAspect = _ScreenWidth / _ScreenHeight;
+			float aspectDiff = abs( screenAspect - targetAspect );
+			if ( _DebugMode < 0.5 && aspectDiff >= 0.01 ) discard;
+
 			// スクリーン座標の正規化
 			float4 screenPos = float4( i.screenPos.xyz, i.screenPos.w + 1e-7 );
 			float4 screenPosNorm = screenPos / screenPos.w;
@@ -207,14 +213,9 @@ Shader "Marumasa/VR180-Camera"
 			o.Emission = finalColor.rgb;
 			o.Alpha = 1;
 
-			// アスペクト比マスククリップ
-			float screenAspect = _ScreenParams.x / _ScreenParams.y;
-			float targetAspect = _ScreenWidth / _ScreenHeight;
-			float aspectDiff = abs( screenAspect - targetAspect );
-			float aspectMask = _DebugMode ? 1.0 : ( aspectDiff < 0.01 ? 1.0 : 0.0 );
 			float squareScreenMask = abs( sign( _ScreenParams.x - _ScreenParams.y ) );
 			
-			clip( finalColor.a * squareScreenMask * aspectMask - _Cutoff );
+			clip( finalColor.a * squareScreenMask - _Cutoff );
 		}
 
 		ENDCG
