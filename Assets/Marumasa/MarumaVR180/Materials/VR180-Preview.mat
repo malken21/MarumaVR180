@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: New Material
+  m_Name: VR180-Preview
   m_Shader: {fileID: 4800000, guid: 94cbbfc8d9b00a849a1e7aea0bb7d7ed, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
