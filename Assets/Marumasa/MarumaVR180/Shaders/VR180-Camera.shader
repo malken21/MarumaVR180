@@ -55,8 +55,6 @@ Shader "Marumasa/VR180-Camera"
 		void vertexDataFunc( inout appdata_full v, out Input o )
 		{
 			UNITY_INITIALIZE_OUTPUT( Input, o );
-			float3 positionOS = v.vertex.xyz;
-			v.vertex.xyz += ( positionOS * 10 );
 			v.vertex.w = 1;
 		}
 
