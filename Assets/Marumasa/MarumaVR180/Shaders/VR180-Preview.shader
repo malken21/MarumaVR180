@@ -3,8 +3,8 @@ Shader "Marumasa/VR180-Preview"
     Properties
     {
         // 右、前、上、下 の順に並んだ 4:1 のテクスチャ
-        [NoScaleOffset] _MainTex ("4:1 Texture (R, F, U, D)", 2D) = "black" {}
-        [NoScaleOffset] _RightTex ("Right Eye Texture (Optional)", 2D) = "black" {}
+        [NoScaleOffset][SingleLineTexture] _LeftEyeTex( "LeftEye-Atlas", 2D ) = "black" {}
+        [NoScaleOffset][SingleLineTexture] _RightEyeTex( "RightEye-Atlas", 2D ) = "black" {}
 
     }
     SubShader
@@ -35,8 +35,8 @@ Shader "Marumasa/VR180-Preview"
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
-            sampler2D _MainTex;
-            sampler2D _RightTex;
+            sampler2D _LeftEyeTex;
+            sampler2D _RightEyeTex;
 
 
             // 頂点シェーダーは前回と同じく視線ベクトルを計算
@@ -150,13 +150,13 @@ Shader "Marumasa/VR180-Preview"
                 // 計算したUVで2Dテクスチャをサンプリング
                 // ステレオレンダリング対応: 右目は _RightTex を使用
                 fixed4 col;
-                if (unity_StereoEyeIndex == 0)
+                 if (unity_StereoEyeIndex == 0)
                 {
-                     col = tex2D(_MainTex, textureUV);
+                     col = tex2D(_LeftEyeTex, textureUV);
                 }
                 else
                 {
-                     col = tex2D(_RightTex, textureUV);
+                     col = tex2D(_RightEyeTex, textureUV);
                 }
                 
 
