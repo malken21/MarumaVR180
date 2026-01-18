@@ -1,4 +1,4 @@
-# MarumaVR180
+# MarumaCam
 
 UnityおよびVRChat向けのVR180立体視映像表示システムです。
 
