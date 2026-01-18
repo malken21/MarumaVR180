@@ -33,6 +33,10 @@ Shader "Marumasa/BodySurfaceShader"
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
+            // 正方形のカメラ（アスペクト比1:1）の場合は描画しない
+            float squareScreenMask = abs(sign(_ScreenParams.x - _ScreenParams.y));
+            clip(squareScreenMask - 0.5);
+
             fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
             o.Albedo = c.rgb;
             o.Metallic = _Metallic;
