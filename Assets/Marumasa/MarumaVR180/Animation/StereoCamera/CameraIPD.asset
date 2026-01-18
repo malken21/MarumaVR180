@@ -6,10 +6,10 @@ BlendTree:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: CameraProximity
+  m_Name: CameraIPD
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 7cd138f9a32e5494f815c75f37070561, type: 2}
+    m_Motion: {fileID: 7400000, guid: 93c7a895711251f408524149fdf3a2e7, type: 2}
     m_Threshold: 0
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -17,14 +17,14 @@ BlendTree:
     m_DirectBlendParameter: Blend
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 93c7a895711251f408524149fdf3a2e7, type: 2}
+    m_Motion: {fileID: 7400000, guid: 7cd138f9a32e5494f815c75f37070561, type: 2}
     m_Threshold: 1
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
     m_CycleOffset: 0
     m_DirectBlendParameter: Blend
     m_Mirror: 0
-  m_BlendParameter: ProximitySensor
+  m_BlendParameter: CameraIPD
   m_BlendParameterY: Blend
   m_MinThreshold: 0
   m_MaxThreshold: 1
