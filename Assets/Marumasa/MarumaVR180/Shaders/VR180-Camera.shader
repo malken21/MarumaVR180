@@ -2,16 +2,16 @@ Shader "Marumasa/VR180-Camera"
 {
 	Properties
 	{
-		// 左目用テクスチャ
+
 		[NoScaleOffset][SingleLineTexture] _LeftEyeTex( "LeftEye-Atlas", 2D ) = "black" {}
-		// 右目用テクスチャ
+
 		[NoScaleOffset][SingleLineTexture] _RightEyeTex( "RightEye-Atlas", 2D ) = "black" {}
 		
-		// 画面サイズ
+
 		_ScreenWidth( "Screen Width", Float ) = 16
 		_ScreenHeight( "Screen Height", Float ) = 9
 		
-		// デバッグ設定
+
 		[Toggle] _DebugMode( "DebugMode", Float ) = 0
 		_Cutoff( "Mask Clip Value", Float ) = 0.5
 		[HideInInspector] __dirty( "", Int ) = 1
@@ -53,26 +53,26 @@ Shader "Marumasa/VR180-Camera"
 		uniform float _Cutoff = 0.5;
 		uniform int _VRChatCameraMode;
 
-		// 頂点シェーダー
+
 		void vertexDataFunc( inout appdata_full v, out Input o )
 		{
 			UNITY_INITIALIZE_OUTPUT( Input, o );
 			v.vertex.w = 1;
 		}
 
-		// ライティング無効化
+
 		inline half4 LightingUnlit( SurfaceOutput s, half3 lightDir, half atten )
 		{
 			return half4( 0, 0, 0, s.Alpha );
 		}
 
-		// UVリマップ
+
 		float2 RemapUV( float2 value, float2 fromMin, float2 fromMax, float2 toMin, float2 toMax )
 		{
 			return toMin + ( value - fromMin ) * ( toMax - toMin ) / ( fromMax - fromMin );
 		}
 
-		// マスク計算
+
 		float ComputeFaceMask( float2 uv )
 		{
 			float2 floorUV = 1.0 - floor( uv );
@@ -80,12 +80,12 @@ Shader "Marumasa/VR180-Camera"
 			return floorUV.x * floorUV.y * ceilUV.x * ceilUV.y;
 		}
 
-		// サーフェスシェーダー
+
 		void surf( Input i, inout SurfaceOutput o )
 		{
 			if ( _VRChatCameraMode == 2 ) discard;
 
-			// アスペクト比チェック
+
 			float screenAspect = _ScreenParams.x / _ScreenParams.y;
 			float targetAspect = _ScreenWidth / _ScreenHeight;
 			float aspectDiff = abs( screenAspect - targetAspect );
@@ -97,12 +97,12 @@ Shader "Marumasa/VR180-Camera"
 
 			if ( _VRChatCameraMode == 0 && isVR ) discard;
 
-			// スクリーン座標の正規化
+
 			float4 screenPos = float4( i.screenPos.xyz, i.screenPos.w + 1e-7 );
 			float4 screenPosNorm = screenPos / screenPos.w;
 			screenPosNorm.z = ( UNITY_NEAR_CLIP_VALUE >= 0 ) ? screenPosNorm.z : screenPosNorm.z * 0.5 + 0.5;
 
-			// 極座標変換
+
 			float2 polarCoords = RemapUV(
 				screenPosNorm.xy,
 				float2( 0, 0 ), float2( 1, 1 ),
@@ -111,7 +111,7 @@ Shader "Marumasa/VR180-Camera"
 			float azimuth = polarCoords.x + radians( 45.0 );
 			float elevation = polarCoords.y / 2.0;
 
-			// 球面ベクトル
+
 			float cosElevation = cos( elevation );
 			float3 sphereVector = float3(
 				cosElevation * sin( azimuth ),
@@ -119,7 +119,7 @@ Shader "Marumasa/VR180-Camera"
 				cosElevation * cos( azimuth )
 			);
 
-			// 投影角度の計算
+
 			float3 vecYZ = normalize( float3( 0.0, sphereVector.y, sphereVector.z ) );
 			float3 vecXY = normalize( float3( sphereVector.x, sphereVector.y, 0.0 ) );
 			float3 vecXZ = normalize( float3( sphereVector.x, 0.0, sphereVector.z ) );
@@ -131,27 +131,27 @@ Shader "Marumasa/VR180-Camera"
 			float3 projectionAngles = float3( dotYZ, dotXY, dotXZ );
 			float3 sinAngles = sqrt( 1.0 - ( projectionAngles * projectionAngles ) );
 
-			// 投影UVの計算
+
 			float2 projectedYZ = ( 1.0 / sinAngles.x ) * sphereVector.yz;
 			float2 projectedXY = ( 1.0 / sinAngles.y ) * sphereVector.xy;
 			float2 projectedXZ = ( 1.0 / sinAngles.z ) * sphereVector.xz;
 
-			// 左右判定
+
 			half isRightEye = saturate( ceil( -0.5 + screenPosNorm.x ) );
 			
 			float2 finalUV = 0;
 			half finalMask = 0;
 			float4 finalColor = 0;
 
-			// アトラスオフセット
+
 			const float atlasR_offsetX    = 0.00;
 			const float atlasL_offsetX    = 0.25;
 			const float atlasUP_offsetX   = 0.50;
 			const float atlasDOWN_offsetX = 0.75;
 			
-			// 回転していない面用 (x->AtlasX, y->AtlasY)
+
 			float2 uvPaddingPtrn1; 
-			// 回転している面用 (y->AtlasX, x->AtlasY)
+
 			float2 uvPaddingPtrn2;
 
 			if( isRightEye > 0.5 )
@@ -159,30 +159,30 @@ Shader "Marumasa/VR180-Camera"
 				uvPaddingPtrn1 = float2( _RightEyeTex_TexelSize.x * 2.0, _RightEyeTex_TexelSize.y * 0.5 );
 				uvPaddingPtrn2 = float2( uvPaddingPtrn1.y, uvPaddingPtrn1.x );
 
-				// === 右目 ===
 
-				// 右面 (+X)
+
+
 				float2 uvRightLRaw = RemapUV( projectedYZ, float2( -1, 1 ), float2( 1, -1 ), float2( 0, 0 ), float2( 1, 1 ) );
 				float2 uvRightL = clamp( uvRightLRaw, uvPaddingPtrn2, 1.0 - uvPaddingPtrn2 );
 				float2 uvRightL_swapped = float2( uvRightL.y, uvRightL.x );
 				half maskRightL = ComputeFaceMask( saturate( uvRightLRaw ) ) * saturate( ceil( sphereVector.x ) );
 				
-				// 背面 (-Z)
+
 				float2 uvRightRRaw = RemapUV( projectedXY, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
 				float2 uvRightR = clamp( uvRightRRaw, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
 				half maskRightR = ComputeFaceMask( saturate( uvRightRRaw ) ) * saturate( ceil( -sphereVector.z ) );
 				
-				// 上面 (+Y)
+
 				float2 uvRightUpRawVal = RemapUV( projectedXZ, float2( 1, -1 ), float2( -1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
 				float2 uvRightUpRaw = clamp( uvRightUpRawVal, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
 				half maskUp = ComputeFaceMask( saturate( uvRightUpRawVal ) ) * saturate( ceil( sphereVector.y ) );
 				
-				// 下面 (-Y)
+
 				float2 uvRightDownRawVal = RemapUV( projectedXZ, float2( 1, 1 ), float2( -1, -1 ), float2( 0, 0 ), float2( 1, 1 ) );
 				float2 uvRightDownRaw = clamp( uvRightDownRawVal, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
 				half maskDown = ComputeFaceMask( saturate( uvRightDownRawVal ) ) * saturate( ceil( -sphereVector.y ) );
 
-				// UV合成
+
 				finalUV += float2( uvRightL_swapped.x * 0.25 + atlasL_offsetX, uvRightL_swapped.y ) * maskRightL;
 				finalUV += float2( uvRightR.x * 0.25 + atlasR_offsetX, uvRightR.y ) * maskRightR;
 				finalUV += float2( uvRightUpRaw.x * 0.25 + atlasUP_offsetX, uvRightUpRaw.y ) * maskUp;
@@ -197,16 +197,16 @@ Shader "Marumasa/VR180-Camera"
 				uvPaddingPtrn1 = float2( _LeftEyeTex_TexelSize.x * 2.0, _LeftEyeTex_TexelSize.y * 0.5 );
 				uvPaddingPtrn2 = float2( uvPaddingPtrn1.y, uvPaddingPtrn1.x );
 
-				// === 左目 ===
 
-				// 左面 (-X)
-				// 回転済み
+
+
+
 				float2 uvLeftLRaw = RemapUV( projectedYZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
 				float2 uvLeftL = clamp( uvLeftLRaw, uvPaddingPtrn2, 1.0 - uvPaddingPtrn2 );
 				float2 uvLeftL_swapped = float2( uvLeftL.y, uvLeftL.x );
 				half maskLeftL = ComputeFaceMask( saturate( uvLeftLRaw ) ) * saturate( ceil( -sphereVector.x ) );
 
-				// 正面 (+Z)
+
 				float2 uvLeftRRaw = RemapUV( projectedXY, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
 				float2 uvLeftR = clamp( uvLeftRRaw, uvPaddingPtrn1, 1.0 - uvPaddingPtrn1 );
 				half maskLeftR = ComputeFaceMask( saturate( uvLeftRRaw ) ) * saturate( ceil( sphereVector.z ) );
@@ -232,11 +232,11 @@ Shader "Marumasa/VR180-Camera"
 				finalColor = tex2D( _LeftEyeTex, finalUV ) * finalMask;
 			}
 
-			// 出力
+
 			o.Emission = finalColor.rgb;
 			o.Alpha = 1;
 
-			// 正方形スクリーンマスク
+
 			float squareScreenMask = abs( sign( _ScreenParams.x - _ScreenParams.y ) );
 			
 			clip( finalColor.a * squareScreenMask - _Cutoff );
