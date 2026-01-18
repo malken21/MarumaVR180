@@ -203,6 +203,68 @@ MonoBehaviour:
   isDefault: 0
   automaticValue: 1
   label: 
+--- !u!1 &3648807357764156461
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 167778988900705907}
+  - component: {fileID: 5867081191061253398}
+  m_Layer: 0
+  m_Name: "\u76EE\u7DDA\u8868\u793A"
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &167778988900705907
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3648807357764156461}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5138194317718841262}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5867081191061253398
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3648807357764156461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b29d45007c5493d926d2cd45a489529, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Control:
+    name: 
+    icon: {fileID: 0}
+    type: 102
+    parameter:
+      name: isShowEyeBeam
+    value: 1
+    style: 0
+    subMenu: {fileID: 0}
+    subParameters: []
+    labels: []
+  MenuSource: 1
+  menuSource_otherObjectChildren: {fileID: 0}
+  isSynced: 1
+  isSaved: 1
+  isDefault: 0
+  automaticValue: 1
+  label: 
 --- !u!1 &3896537418136062202
 GameObject:
   m_ObjectHideFlags: 0
@@ -275,12 +337,12 @@ GameObject:
   m_Component:
   - component: {fileID: 324547925552640904}
   m_Layer: 0
-  m_Name: EyeLine
+  m_Name: EyeBeam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &324547925552640904
 Transform:
   m_ObjectHideFlags: 0
@@ -717,6 +779,7 @@ Transform:
   - {fileID: 1888105895762558891}
   - {fileID: 6984982365537895544}
   - {fileID: 784320155509474456}
+  - {fileID: 167778988900705907}
   m_Father: {fileID: 4713931002987437384}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3330884409153622193
@@ -807,6 +870,16 @@ MonoBehaviour:
     saved: 1
     hasExplicitDefaultValue: 1
     m_overrideAnimatorDefaults: 0
+  - nameOrPrefix: isShowEyeBeam
+    remapTo: 
+    internalParameter: 0
+    isPrefix: 0
+    syncType: 3
+    localOnly: 0
+    defaultValue: 0
+    saved: 1
+    hasExplicitDefaultValue: 1
+    m_overrideAnimatorDefaults: 0
   - nameOrPrefix: isWorldFixed
     remapTo: 
     internalParameter: 0
@@ -822,7 +895,7 @@ MonoBehaviour:
     internalParameter: 0
     isPrefix: 0
     syncType: 3
-    localOnly: 1
+    localOnly: 0
     defaultValue: 0
     saved: 0
     hasExplicitDefaultValue: 1
@@ -885,7 +958,7 @@ GameObject:
   - component: {fileID: 5940916293816515045}
   - component: {fileID: 3027584290906118716}
   m_Layer: 0
-  m_Name: "\u30DE\u30CD\u30AD\u30F3\u8868\u793A"
+  m_Name: "3D\u30E2\u30C7\u30EB\u8868\u793A"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

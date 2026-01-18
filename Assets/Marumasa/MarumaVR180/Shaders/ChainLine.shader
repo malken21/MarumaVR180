@@ -4,6 +4,7 @@ Shader "Marumasa/ChainLine"
     {
         _Color ("Color", Color) = (1.0, 0.25, 0.25, 1) // 自然な赤 (朱色寄り)
         _Color2 ("Color 2", Color) = (0.95, 0.95, 0.95, 1) // 自然な白 (オフホワイト)
+        _Thickness ("Thickness", Float) = 0.01 // 線の太さ (メートル単位)
     }
     SubShader
     {
@@ -31,6 +32,7 @@ Shader "Marumasa/ChainLine"
 
             fixed4 _Color;
             fixed4 _Color2;
+            float _Thickness;
 
             v2f vert (appdata v)
             {
@@ -47,7 +49,8 @@ Shader "Marumasa/ChainLine"
                 float z = v.vertex.z * 10000;
                 
                 // ローカル座標をワールド座標へ変換（スケール無視）
-                float3 worldPos = origin + right * v.vertex.x + up * v.vertex.y + forward * z;
+                // X, Y 成分に太さ(_Thickness)を適用
+                float3 worldPos = origin + right * (v.vertex.x * _Thickness) + up * (v.vertex.y * _Thickness) + forward * z;
 
                 o.worldPos = worldPos;
                 o.vertex = mul(UNITY_MATRIX_VP, float4(worldPos, 1.0));
