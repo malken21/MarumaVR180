@@ -149,8 +149,10 @@ Shader "Marumasa/VR180-Camera"
 			const float atlasUP_offsetX   = 0.50;
 			const float atlasDOWN_offsetX = 0.75;
 			
-			float2 uvPaddingPtrn1; // For Non-rotated faces (x->AtlasX, y->AtlasY)
-			float2 uvPaddingPtrn2; // For Rotated faces (y->AtlasX, x->AtlasY)
+			// 回転していない面用 (x->AtlasX, y->AtlasY)
+			float2 uvPaddingPtrn1; 
+			// 回転している面用 (y->AtlasX, x->AtlasY)
+			float2 uvPaddingPtrn2;
 
 			if( isRightEye > 0.5 )
 			{
@@ -198,7 +200,7 @@ Shader "Marumasa/VR180-Camera"
 				// === 左目 ===
 
 				// 左面 (-X)
-				// Rotated
+				// 回転済み
 				float2 uvLeftLRaw = RemapUV( projectedYZ, float2( -1, -1 ), float2( 1, 1 ), float2( 0, 0 ), float2( 1, 1 ) );
 				float2 uvLeftL = clamp( uvLeftLRaw, uvPaddingPtrn2, 1.0 - uvPaddingPtrn2 );
 				float2 uvLeftL_swapped = float2( uvLeftL.y, uvLeftL.x );
