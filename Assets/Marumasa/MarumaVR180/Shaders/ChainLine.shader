@@ -2,50 +2,73 @@ Shader "Marumasa/ChainLine"
 {
     Properties
     {
-        _Color ("Color", Color) = (1,1,1,1)
-        _MainTex ("Albedo (RGB)", 2D) = "white" {}
-        _Glossiness ("Smoothness", Range(0,1)) = 0.5
-        _Metallic ("Metallic", Range(0,1)) = 0.0
+        _Color ("Color", Color) = (1,0,0,1)
     }
     SubShader
     {
-        Tags { "RenderType"="BodySurface" }
-        LOD 200
+        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
+        LOD 100
 
-		Cull Off
-
-        CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows
-
-        #pragma target 3.0
-
-        sampler2D _MainTex;
-
-        struct Input
+        Pass
         {
-            float2 uv_MainTex;
-        };
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
 
-        half _Glossiness;
-        half _Metallic;
-        fixed4 _Color;
+            #include "UnityCG.cginc"
 
-        UNITY_INSTANCING_BUFFER_START(Props)
-        UNITY_INSTANCING_BUFFER_END(Props)
+            struct appdata
+            {
+                float4 vertex : POSITION;
+            };
 
-        void surf (Input IN, inout SurfaceOutputStandard o)
-        {
-            // 正方形のカメラ（アスペクト比1:1）の場合は描画しない
-            // 浮動小数点誤差を考慮して差分が十分に小さいかで判定
-            if (abs(_ScreenParams.x - _ScreenParams.y) < 0.1) clip(-1);
+            struct v2f
+            {
+                float4 vertex : SV_POSITION;
+                float3 worldPos : TEXCOORD0;
+            };
 
-            fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
-            o.Albedo = c.rgb;
-            o.Metallic = _Metallic;
-            o.Smoothness = _Glossiness;
-            o.Alpha = c.a;
+            fixed4 _Color;
+
+            v2f vert (appdata v)
+            {
+                v2f o;
+                // Z軸方向に無限に伸ばす（10000倍）
+                v.vertex.z *= 10000;
+                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+                return o;
+            }
+
+            fixed4 frag (v2f i) : SV_Target
+            {
+                // 正方形のカメラ（アスペクト比1:1）の場合は描画しない for VR180Preview
+                if (abs(_ScreenParams.x - _ScreenParams.y) < 0.1) discard;
+
+                // 100mm (0.1m) 周期の一点鎖線
+                // パターン:
+                // 0.0 - 0.6 : 線 (0.06m)
+                // 0.6 - 0.7 : 空白 (0.01m)
+                // 0.7 - 0.8 : 点 (0.01m)
+                // 0.8 - 1.0 : 空白 (0.02m)
+
+                // オブジェクト原点からの距離(球状)だと原点付近でパターンが歪む(丸くなる)ため、
+                // Z軸ベクトルへの射影距離(直線性)を使用する
+                float3 objectOrigin = mul(unity_ObjectToWorld, float4(0,0,0,1)).xyz;
+                float3 objectZAxis = normalize(mul(unity_ObjectToWorld, float4(0,0,1,0)).xyz);
+                
+                float3 vec = i.worldPos - objectOrigin;
+                float dist = abs(dot(vec, objectZAxis));
+                
+                float cycle = 0.1;
+                float t = fmod(dist, cycle) / cycle;
+
+                if (t > 0.6 && t < 0.7) discard;
+                if (t > 0.8) discard;
+
+                return _Color;
+            }
+            ENDCG
         }
-        ENDCG
     }
-    FallBack "Diffuse"
 }
