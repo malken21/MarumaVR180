@@ -16,8 +16,7 @@ Shader "Marumasa/VR180-Preview"
         Tags { "RenderType"="Opaque" "Queue"="Geometry" }
         LOD 100
 
-        // 両面描画
-        Cull Off 
+        Cull Front 
 
         Pass
         {
