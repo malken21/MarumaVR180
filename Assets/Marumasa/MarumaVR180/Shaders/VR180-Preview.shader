@@ -38,7 +38,7 @@ Shader "Marumasa/VR180-Preview"
             struct v2f
             {
                 float4 vertex : SV_POSITION;
-                float3 worldViewDir : TEXCOORD0;
+                float3 objViewDir : TEXCOORD0;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -46,7 +46,7 @@ Shader "Marumasa/VR180-Preview"
             sampler2D _RightEyeTex;
 
 
-            // 頂点シェーダーは前回と同じく視線ベクトルを計算
+            // 頂点シェーダーは視線ベクトルを計算
             v2f vert (appdata v)
             {
                 v2f o;
@@ -55,8 +55,9 @@ Shader "Marumasa/VR180-Preview"
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
-                o.worldViewDir = worldPos - _WorldSpaceCameraPos;
+                // オブジェクト空間での視線ベクトル (Vertex -> Camera の逆、つまり Camera -> Vertex)
+                // ObjSpaceViewDirは (Camera - Vertex) なので、符号を反転させる
+                o.objViewDir = -ObjSpaceViewDir(v.vertex);
                 return o;
             }
 
@@ -152,7 +153,7 @@ Shader "Marumasa/VR180-Preview"
                 float squareScreenMask = abs(sign(_ScreenParams.x - _ScreenParams.y));
                 clip(squareScreenMask - 0.5);
 
-                float3 viewDir = normalize(i.worldViewDir);
+                float3 viewDir = normalize(i.objViewDir);
                 
                 float2 textureUV;
                 float mask;
