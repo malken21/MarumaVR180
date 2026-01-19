@@ -12,12 +12,12 @@ GameObject:
   - component: {fileID: 6547534386390645261}
   - component: {fileID: 9023371543612804807}
   m_Layer: 0
-  m_Name: ChainLine
+  m_Name: EyeBeam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7886462932626126248
 Transform:
   m_ObjectHideFlags: 0
