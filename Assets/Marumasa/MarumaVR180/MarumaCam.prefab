@@ -447,7 +447,7 @@ MonoBehaviour:
     icon: {fileID: 0}
     type: 102
     parameter:
-      name: 
+      name: isShowAOV
     value: 1
     style: 0
     subMenu: {fileID: 0}
@@ -944,6 +944,16 @@ MonoBehaviour:
     syncType: 2
     localOnly: 0
     defaultValue: 0.2
+    saved: 1
+    hasExplicitDefaultValue: 1
+    m_overrideAnimatorDefaults: 0
+  - nameOrPrefix: isShowAOV
+    remapTo: 
+    internalParameter: 0
+    isPrefix: 0
+    syncType: 3
+    localOnly: 0
+    defaultValue: 1
     saved: 1
     hasExplicitDefaultValue: 1
     m_overrideAnimatorDefaults: 0
