@@ -491,8 +491,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3189078100481257103}
-  - component: {fileID: 9010979635395775036}
-  - component: {fileID: 2076441030604922780}
+  - component: {fileID: 1671070337239632282}
+  - component: {fileID: 5451593898352498951}
   m_Layer: 0
   m_Name: Global
   m_TagString: Untagged
@@ -519,7 +519,7 @@ Transform:
   - {fileID: 1918178211708458005}
   m_Father: {fileID: 70210074023516212}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &9010979635395775036
+--- !u!95 &1671070337239632282
 Animator:
   serializedVersion: 5
   m_ObjectHideFlags: 0
@@ -540,7 +540,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &2076441030604922780
+--- !u!114 &5451593898352498951
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -556,7 +556,7 @@ MonoBehaviour:
   layerType: 5
   deleteAttachedAnimator: 1
   pathMode: 0
-  matchAvatarWriteDefaults: 1
+  matchAvatarWriteDefaults: 0
   relativePathRoot:
     referencePath: 
     targetObject: {fileID: 0}
@@ -1752,8 +1752,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4749053092056761608}
-  - component: {fileID: 4042093472803768470}
-  - component: {fileID: 3161427386074998819}
+  - component: {fileID: 5215545287085484260}
+  - component: {fileID: 6273397371876109552}
   m_Layer: 0
   m_Name: Global
   m_TagString: Untagged
@@ -1780,7 +1780,7 @@ Transform:
   - {fileID: 1898049207440437220}
   m_Father: {fileID: 4687116541202443320}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!95 &4042093472803768470
+--- !u!95 &5215545287085484260
 Animator:
   serializedVersion: 5
   m_ObjectHideFlags: 0
@@ -1801,7 +1801,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &3161427386074998819
+--- !u!114 &6273397371876109552
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1817,7 +1817,7 @@ MonoBehaviour:
   layerType: 5
   deleteAttachedAnimator: 1
   pathMode: 0
-  matchAvatarWriteDefaults: 1
+  matchAvatarWriteDefaults: 0
   relativePathRoot:
     referencePath: 
     targetObject: {fileID: 0}
