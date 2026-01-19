@@ -3,7 +3,12 @@ guid: fa9c1511dd54a234e8c2927d7dc481de
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cross
+    second: {fileID: 2100000, guid: 3e177ccf0c9770d4d9be6bfce647a392, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
