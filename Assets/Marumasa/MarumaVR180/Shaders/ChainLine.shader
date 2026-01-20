@@ -45,9 +45,15 @@ Shader "Marumasa/ChainLine"
 
             fixed4 frag (v2f i) : SV_Target
             {
-                // 正方形のカメラ（アスペクト比1:1）の場合は描画しない
-                // 浮動小数点誤差を考慮して差分が十分に小さいかで判定
-                if (abs(_ScreenParams.x - _ScreenParams.y) < 0.1) clip(-1);
+                // カメラとオブジェクトの回転が一致していない場合は描画しない
+                // カメラのForwardはUNITY_MATRIX_I_Vの第3列（Z軸）の逆方向（OpenGL規約のため）
+                float3 camFwd = -normalize(float3(UNITY_MATRIX_I_V._m02, UNITY_MATRIX_I_V._m12, UNITY_MATRIX_I_V._m22));
+                float3 camUp = normalize(float3(UNITY_MATRIX_I_V._m01, UNITY_MATRIX_I_V._m11, UNITY_MATRIX_I_V._m21));
+
+                float3 objFwd = normalize(float3(unity_ObjectToWorld._m02, unity_ObjectToWorld._m12, unity_ObjectToWorld._m22));
+                float3 objUp = normalize(float3(unity_ObjectToWorld._m01, unity_ObjectToWorld._m11, unity_ObjectToWorld._m21));
+
+                if (dot(camFwd, objFwd) > 0.999 && dot(camUp, objUp) > 0.999 && abs(_ScreenParams.x - _ScreenParams.y) < 0.1 ) discard;
 
                 fixed4 c = tex2D(_MainTex, i.uv);
                 return c;
